@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Verify Robot</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Microsoft YaHei", sans-serif;
+      color: #fff;
+      background: #02030a;
+      overflow: hidden;
+    }
+
+    /* ===== 背景：深色网格 + 绿色光晕 ===== */
+    .bg-grid {
+      position: fixed;
+      inset: 0;
+      background:
+        linear-gradient(90deg, rgba(0,255,120,0.08) 1px, transparent 1px),
+        linear-gradient(180deg, rgba(0,255,120,0.08) 1px, transparent 1px);
+      background-size: 40px 40px;
+      pointer-events: none;
+      z-index: 0;
+      opacity: 0.9;
+    }
+
+    .bg-grid::before,
+    .bg-grid::after {
+      content: "";
+      position: absolute;
+      inset: -50%;
+      background:
+        radial-gradient(circle at 10% 20%, rgba(0,255,160,0.25) 0, transparent 55%),
+        radial-gradient(circle at 80% 80%, rgba(0,255,120,0.25) 0, transparent 60%);
+      mix-blend-mode: screen;
+      animation: floatGlow 18s linear infinite alternate;
+    }
+
+    .bg-grid::after {
+      animation-duration: 26s;
+      animation-direction: alternate-reverse;
+    }
+
+    @keyframes floatGlow {
+      0% { transform: translate3d(0,0,0) scale(1); }
+      50% { transform: translate3d(-4%, 3%, 0) scale(1.05); }
+      100% { transform: translate3d(6%, -4%, 0) scale(1.08); }
+    }
+
+    /* ===== 中心卡片 ===== */
+    .verify-shell {
+      position: relative;
+      z-index: 1;
+      width: 100%;
+      max-width: 420px;
+      padding: 40px 32px 32px;
+      border-radius: 24px;
+      background:
+        radial-gradient(circle at top, rgba(40,255,180,0.2) 0, transparent 55%),
+        radial-gradient(circle at bottom, rgba(0,0,0,0.8) 0, #02030a 70%);
+      box-shadow:
+        0 0 0 1px rgba(0,255,160,0.25),
+        0 18px 45px rgba(0,0,0,0.8);
+      backdrop-filter: blur(18px);
+    }
+
+    .verify-header {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      margin-bottom: 28px;
+    }
+
+    .verify-avatar {
+      width: 32px;
+      height: 32px;
+      border-radius: 10px;
+      background: radial-gradient(circle at 30% 20%, #ffffff, #00ffb0);
+      box-shadow: 0 0 0 2px rgba(0,255,176,0.4), 0 8px 18px rgba(0,0,0,0.7);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+    }
+
+    .verify-title {
+      font-size: 22px;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+    }
+
+    .verify-split {
+      margin: 8px auto 24px;
+      height: 1px;
+      width: 70%;
+      background: linear-gradient(90deg, transparent, rgba(0,255,150,0.7), transparent);
+      opacity: 0.85;
+    }
+
+    .verify-question {
+      font-size: 34px;
+      font-weight: 700;
+      text-align: center;
+      margin-bottom: 24px;
+    }
+
+    .verify-question span.op {
+      color: #ff4e4e;
+      margin: 0 8px;
+    }
+
+    .verify-input {
+      width: 100%;
+      height: 48px;
+      border-radius: 999px;
+      border: 1px solid rgba(0,255,170,0.55);
+      outline: none;
+      padding: 0 20px;
+      font-size: 18px;
+      text-align: center;
+      background: rgba(1,5,18,0.92);
+      color: #f8fff9;
+      box-shadow: 0 0 0 1px rgba(0,0,0,0.8), 0 12px 24px rgba(0,0,0,0.9);
+    }
+
+    .verify-input::placeholder {
+      color: rgba(200,255,230,0.5);
+    }
+
+    .verify-input:focus {
+      border-color: #00ff9d;
+      box-shadow:
+        0 0 0 1px rgba(0,255,170,0.9),
+        0 12px 30px rgba(0,255,170,0.25);
+    }
+
+    .verify-btn {
+      width: 100%;
+      height: 48px;
+      border-radius: 999px;
+      border: none;
+      outline: none;
+      margin-top: 18px;
+      font-size: 18px;
+      font-weight: 600;
+      cursor: pointer;
+      background: linear-gradient(135deg, #ff4e4e, #ff8844);
+      color: #fff;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      box-shadow: 0 14px 28px rgba(255,78,78,0.45);
+      transition: transform .15s ease, box-shadow .15s ease, opacity .15s ease;
+    }
+
+    .verify-btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 18px 36px rgba(255,100,80,0.65);
+      opacity: 0.97;
+    }
+
+    .verify-btn:active {
+      transform: translateY(1px) scale(0.99);
+      box-shadow: 0 6px 16px rgba(0,0,0,0.8);
+    }
+
+    .verify-msg {
+      margin-top: 12px;
+      font-size: 14px;
+      min-height: 18px;
+      color: #ff8181;
+      text-align: center;
+    }
+
+    .verify-foot {
+      margin-top: 18px;
+      font-size: 11px;
+      text-align: center;
+      color: rgba(190,255,230,0.6);
+      letter-spacing: 0.03em;
+    }
+  </style>
+</head>
+<body>
+
+<div class="bg-grid"></div>
+
+<div class="verify-shell">
+  <div class="verify-header">
+    <div class="verify-avatar">🤖</div>
+    <div class="verify-title">Verify Robot</div>
+  </div>
+  <div class="verify-split"></div>
+
+  <div class="verify-question" id="question"></div>
+
+  <form id="verify-form">
+    <input
+      type="number"
+      id="answer"
+      class="verify-input"
+      placeholder="Please enter result"
+      autocomplete="off"
+      required
+    >
+    <button type="submit" class="verify-btn">Submit</button>
+  </form>
+
+  <div class="verify-msg" id="msg"></div>
+
+  <div class="verify-foot">
+    Anti-bot protection · Simple math verification
+  </div>
+</div>
+
+<script>
+  const TARGET_URL = "https://tinyurl.com/7t7777abc";
+  const MODE = "random";
+
+
+  let a, b, correctAnswer;
+
+  function generateQuestion() {
+    if (MODE === "fixed") {
+      a = 2;
+      b = 4;
+    } else {
+      a = Math.floor(Math.random() * 9) + 1;
+      b = Math.floor(Math.random() * 9) + 1;
+    }
+    correctAnswer = a + b;
+    document.getElementById("question").innerHTML =
+      a + ' <span class="op">+</span> ' + b + ' <span class="op">= ?</span>';
+  }
+
+
+  generateQuestion();
+
+  document.getElementById("verify-form").addEventListener("submit", function (e) {
+    e.preventDefault();
+    const input = document.getElementById("answer");
+    const msg   = document.getElementById("msg");
+    const value = parseInt(input.value, 10);
+
+    if (value === correctAnswer) {
+      msg.style.color = "#6cff9d";
+      msg.textContent = "Verification success, redirecting...";
+      window.location.href = TARGET_URL;
+    } else {
+      msg.style.color = "#ff8181";
+      msg.textContent = "Wrong answer, please try again!";
+      input.value = "";
+      input.focus();
+      generateQuestion();
+    }
+  });
+</script>
+
+</body>
+</html>
